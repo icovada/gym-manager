@@ -1,4 +1,5 @@
 from __future__ import annotations
+from tokenize import Number
 from tabulate import tabulate
 import itertools
 from typing import List, Type, Dict
@@ -8,9 +9,11 @@ class NumberedObject():
     id = itertools.count()
     prompt_attrs: Dict[str, str] = {}
 
-    def get_prompt_attrs_dict(self) -> dict:
+    def get_menu_attrs_dict(self) -> dict:
         outd = {}
-        for attr in self.prompt_attrs:
+        attrs_plus_id = {"id": "ID"}
+        attrs_plus_id.update(self.prompt_attrs)
+        for attr in attrs_plus_id:
             outd[attr] = getattr(self, attr)
 
         return outd
@@ -44,19 +47,16 @@ class ObjectTable():
         obj_id = int(obj_id)
         return self._dict[obj_id]
 
-    def filter(self, attr, value) -> NumberedObject:
+    def filter(self, attr, value) -> list[NumberedObject]:
         out_list = []
         for x in self._dict.values():
             if getattr(x, attr) == value:
                 out_list.append(x)
 
-        assert len(out_list) < 2, "Search returned more than one result"
-        assert len(out_list) > 0, "Search returned zero results"
-
-        return out_list[0]
+        return out_list
 
     def format_list(self) -> str:
-        table = [x.get_prompt_attrs_dict() for x in self._dict.values()]
+        table = [x.get_menu_attrs_dict() for x in self._dict.values()]
         return tabulate(table, self.object_class.prompt_attrs, tablefmt="simple")
 
     def interactive_get(self) -> Type[object_class]:
@@ -73,7 +73,7 @@ class TrainingClass(NumberedObject):
     price: str
     max_members: int
     member_list: List[Member]
-    prompt_attrs={"id": "ID", "name": "Name",
+    prompt_attrs={"name": "Name",
         "price": "Price", "max_members": "Max Members", "empty_seats": "Empty Seats"}
 
     def __init__(self, name: str, price: str, max_members: int) -> None:
@@ -127,7 +127,7 @@ class Member(NumberedObject):
     phone: str
     age: int
     class_list: List[TrainingClass]
-    prompt_attrs={"id": "ID", "name": "Name",
+    prompt_attrs={"name": "Name",
         "surname": "Surname", "phone": "Phone", "age": "Age"}
 
 
@@ -162,7 +162,7 @@ class Trainer(NumberedObject):
     surname: str
     phone: str
     class_list: List[TrainingClass]
-    prompt_attrs={"id": "ID", "name": "Name",
+    prompt_attrs={"name": "Name",
         "surname": "Surname", "phone": "Phone"}
 
     def __init__(self, name: str, surname: str, phone: str):

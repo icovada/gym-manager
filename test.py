@@ -73,8 +73,8 @@ class TestObjectTable(unittest.TestCase):
         class_list = ObjectTable(TrainingClass)
         class_list.add(training_class)
 
-        self.assertEqual(training_class, class_list.filter("name", "zumba"))
-        self.assertEqual(training_class, class_list.filter("price", "350"))
+        self.assertIn(training_class, class_list.filter("name", "zumba"))
+        self.assertIn(training_class, class_list.filter("price", "350"))
 
     def test_find_object_by_attr_too_many(self):
         training_class = TrainingClass("zumba", "350", 3)
@@ -83,14 +83,13 @@ class TestObjectTable(unittest.TestCase):
         class_list.add(training_class)
         class_list.add(training_class2)
 
-        self.assertRaises(AssertionError, class_list.filter,
-                          attr="name", value="zumba")
+        self.assertEqual(len(class_list.filter(attr="name", value="zumba")), 2)
 
     def test_find_object_by_attr_too_few(self):
         class_list = ObjectTable(TrainingClass)
 
-        self.assertRaises(AssertionError, class_list.filter,
-                          attr="name", value="zumba")
+        self.assertEqual(len(class_list.filter(attr="name", value="zumba")), 0)
+
 
     def test_fail_add_other_object_type(self):
         class_list = ObjectTable(Member)
