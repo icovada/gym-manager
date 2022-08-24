@@ -1,127 +1,13 @@
-import itertools
-from operator import iconcat
-
-# GLOBALI
-LISTA_ISCRITTI = []
-LISTA_TRAINER = []
-LISTA_CORSI = []
+from typing import Dict
+from objects import TrainingClass, Member, Trainer, ObjectTable
 
 
-class Corso(object):
-    id = itertools.count()
-
-    def __init__(self, nome, prezzo, max_iscritti):
-        self.id = next(self.id)
-        self.nome = nome
-        self.trainer = []
-        self.prezzo = prezzo
-        self.max_iscritti = max_iscritti
-        self.iscritti = []
-
-    def visualizza(self):
-        print("Nome del corso: ", self.nome)
-        print("Prezzo: ", self.prezzo)
-        print("Elenco trainer: ", self.trainer)
-        print("Numero massimo di iscritti: ", self.max_iscritti)
-        print("posti disponibili: ", self.max_iscritti-len(self.iscritti))
-
-    def agg_iscritto(self, ogg_iscritto):
-        self.iscritti.append(ogg_iscritto.id)
-        ogg_iscritto.corsi.append(self.id)
-
-    def agg_trainer(self, ogg_trainer):
-        self.trainer.append(ogg_trainer.id)
-        ogg_trainer.corsi.append(self.id)
-
-    def rimuovi_iscritto(self, ogg_iscritto):
-        self.iscritti.remove(ogg_iscritto.id)
-        ogg_iscritto.corsi.remove(self.id)
-
-    def rimuovi_trainer(self, ogg_trainer):
-        self.trainer.remove(ogg_trainer.id)
-        ogg_trainer.corsi.remove(self.id)
+def main(members_list, trainers_list, training_class_list):
+    pass
 
 
-class Iscritto(object):
-    id = itertools.count()
-
-    def __init__(self, nome, cognome, numero, eta):
-        self.id = next(self.id)
-        self.nome = nome
-        self.cognome = cognome
-        self.numero = numero
-        self.eta = eta
-        self.corsi = []
-
-    def visualizza(self):
-        print("Nome iscritto: ", self.nome, self.cognome)
-        print("Numero di telefono: ", self.numero)
-        print("Età: ", self.eta)
-        print("Frequenta i corsi: ", self.corsi)  # lista dei corsi?
-
-    def agg_corso(self, corso):
-        # passare se stesso all'oggetto corso scelto sfruttado la sua funzione
-        corso.agg_iscritto(self)
-
-    def rimuovi_corso(self, corso):
-        corso.rimuovi_iscritto(self)
-
-
-class Trainer(object):
-    id = itertools.count()
-
-    def __init__(self, nome, cognome, numero):
-        self.id = next(self.id)
-        self.nome = nome
-        self.cognome = cognome
-        self.numero = numero
-        self.corsi = []
-
-    def visualizza(self):
-        print("Nome Trainer: ", self.nome, self.cognome)
-        print("Numero di telefono: ", self.numero)
-        print("Gestisce i corsi: ", self.corsi)
-
-    def agg_corso(self, corso):
-        # passare se stesso all'oggetto corso scelto sfruttado la sua funzione
-        corso.agg_trainer(self)
-
-    def rimuovi_corso(self, corso):
-        corso.rimuovi_trainer(self)
-
-
-def table_corso():
-    print("ID".rjust(4), "NOME".ljust(15))
-    for i in LISTA_CORSI:
-        print(str(i.id).rjust(4), i.nome.ljust(15))
-
-
-def table_trainer():
-    print("ID".rjust(4), "NOME".ljust(
-        15),  "COGNOME".ljust(15))
-    for i in LISTA_TRAINER:
-        print(str(i.id).rjust(4), i.nome.ljust(
-            15), i.cognome.ljust(15))
-
-
-def table_iscritto():
-    print("ID".rjust(4), "NOME".ljust(
-        15),  "COGNOME".ljust(15))
-    for i in LISTA_ISCRITTI:
-        print(str(i.id).rjust(4), i.nome.ljust(
-            15), i.cognome.ljust(15))
-
-
-def trova_oggetto(id, lista):
-    obj = None
-    for i in lista:
-        if i.id == int(id):
-            obj = i
-            break
-    return obj
-
-
-def main():
+    
+def old():    
     while True:
         domanda = input('''
                     __________________________________________________
@@ -375,4 +261,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    members_list = ObjectTable()
+    trainers_list = ObjectTable()
+    training_class_list = ObjectTable()
+    main(members_list, trainers_list, training_class_list)
