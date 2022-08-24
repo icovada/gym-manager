@@ -62,7 +62,7 @@ class TestBaseObjects(unittest.TestCase):
 class TestObjectTable(unittest.TestCase):
     def test_find_object_by_id(self):
         training_class = TrainingClass("zumba", "350", 3)
-        class_list = ObjectTable()
+        class_list = ObjectTable(TrainingClass)
         class_list.add(training_class)
 
         self.assertIn(training_class.id, class_list._dict)
@@ -70,7 +70,7 @@ class TestObjectTable(unittest.TestCase):
 
     def test_find_object_by_attr(self):
         training_class = TrainingClass("zumba", "350", 3)
-        class_list = ObjectTable()
+        class_list = ObjectTable(TrainingClass)
         class_list.add(training_class)
 
         self.assertEqual(training_class, class_list.filter("name", "zumba"))
@@ -79,7 +79,7 @@ class TestObjectTable(unittest.TestCase):
     def test_find_object_by_attr_too_many(self):
         training_class = TrainingClass("zumba", "350", 3)
         training_class2 = TrainingClass("zumba", "350", 3)
-        class_list = ObjectTable()
+        class_list = ObjectTable(TrainingClass)
         class_list.add(training_class)
         class_list.add(training_class2)
 
@@ -87,11 +87,16 @@ class TestObjectTable(unittest.TestCase):
                           attr="name", value="zumba")
 
     def test_find_object_by_attr_too_few(self):
-        class_list = ObjectTable()
+        class_list = ObjectTable(TrainingClass)
 
         self.assertRaises(AssertionError, class_list.filter,
                           attr="name", value="zumba")
 
+    def test_fail_add_other_object_type(self):
+        class_list = ObjectTable(Member)
+        training_class = TrainingClass("zumba", "350", 3)
+
+        self.assertRaises(ValueError, class_list.add, obj=training_class)
 
 if __name__ == '__main__':
     unittest.main()

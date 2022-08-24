@@ -1,18 +1,25 @@
 from __future__ import annotations
+from ast import Num
 from dataclasses import dataclass
 import itertools
-from typing import List
+from typing import List, Type
 
 
 @dataclass
 class NumberedObject():
     id = itertools.count()
+    list_attrs = []
+    
 
 class ObjectTable():
-    def __init__(self) -> None:
+    def __init__(self, object_class: Type[NumberedObject]) -> None:
         self._dict = {}
+        self.object_class = object_class
 
     def add(self, obj: NumberedObject) -> None:
+        if not isinstance(obj, self.object_class):
+            raise ValueError
+
         self._dict.update({obj.id: obj})
 
     def remove(self, obj: NumberedObject) -> None:
@@ -31,6 +38,14 @@ class ObjectTable():
         
         return out_list[0]
         
+    def choice_prompt(self) -> NumberedObject:
+        self.print_list(self)
+        return self.ask_one(self)
+
+    def print_list(self):
+        field_length = {}
+        for attr in self.list_attrs:
+            field_length[i] = max([len(getattr(obj, attr)) for obj in self._dict])
 
 
 class TrainingClass(NumberedObject):
