@@ -21,9 +21,16 @@ class ObjectTable():
     def get(self, obj_id: int) -> NumberedObject:
         return self._dict[obj_id]
 
-    def filter(self, attr, value):
-        sorted_dict = {getattr(v, attr): v for k, v in self._dict.items()}
-        return sorted_dict[value]
+    def filter(self, attr, value) -> NumberedObject:
+        out_list = []
+        for k, v in self._dict.items():
+            out_list.append(v) if getattr(v, attr) == value else None
+        
+        assert len(out_list) < 2, "Search returned more than one result"
+        assert len(out_list) > 0, "Search returned zero results"
+        
+        return out_list[0]
+        
 
 
 class TrainingClass(NumberedObject):
