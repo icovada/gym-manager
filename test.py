@@ -1,5 +1,5 @@
 import unittest
-from objects import Member, Trainer, TrainingClass
+from objects import Member, ObjectTable, Trainer, TrainingClass
 
 
 class TestBaseObjects(unittest.TestCase):
@@ -58,7 +58,24 @@ class TestBaseObjects(unittest.TestCase):
         member = Member("federico", "tabbo", "3601074728", 31)
         
         self.assertRaises(ValueError, training_class.add_member, member_obj=member)
+
+class TestObjectTable(unittest.TestCase):
+    def test_find_object_by_id(self):
+        training_class = TrainingClass("zumba", "350", 3)
+        class_list = ObjectTable()
+        class_list.add(training_class)
         
+        self.assertIn(training_class.id, class_list._dict)
+        self.assertEqual(training_class, class_list.get(training_class.id))
+
+    def test_find_object_by_attr(self):
+        training_class = TrainingClass("zumba", "350", 3)
+        class_list = ObjectTable()
+        class_list.add(training_class)
+        
+        self.assertEqual(training_class, class_list.filter("name", "zumba"))
+        self.assertEqual(training_class, class_list.filter("price", "350"))
+
 
 if __name__ == '__main__':
     unittest.main()

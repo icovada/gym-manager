@@ -22,7 +22,7 @@ class ObjectTable():
         return self._dict[obj_id]
 
     def filter(self, attr, value):
-        sorted_dict = {v.getattr(attr): v for k, v in self._dict.items()}
+        sorted_dict = {getattr(v, attr): v for k, v in self._dict.items()}
         return sorted_dict[value]
 
 
