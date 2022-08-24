@@ -14,6 +14,9 @@ class NumberedObject():
             outd[attr] = getattr(self, attr)
 
         return outd
+    
+    def cleanup(self) -> None:
+        raise NotImplementedError
 
 
 class ObjectTable():
@@ -24,6 +27,9 @@ class ObjectTable():
         self._dict = {}
         self.object_class = object_class
 
+    def all(self) -> list:
+        return self._dict.values()
+
     def add(self, obj: NumberedObject) -> None:
         if not isinstance(obj, self.object_class):
             raise ValueError
@@ -31,6 +37,7 @@ class ObjectTable():
         self._dict.update({obj.id: obj})
 
     def remove(self, obj: NumberedObject) -> None:
+        obj.cleanup()
         self._dict.pop(obj.id)
 
     def get(self, obj_id: int) -> NumberedObject:
@@ -88,17 +95,24 @@ class TrainingClass(NumberedObject):
         self.member_list.append(member_obj)
         member_obj.class_list.append(self)
 
-    def add_trainer(self, trainer_obj: Trainer):
+    def add_trainer(self, trainer_obj: Trainer) -> None:
         self.trainer_list.append(trainer_obj)
         trainer_obj.class_list.append(self)
 
-    def remove_member(self, member_obj: Member):
+    def remove_member(self, member_obj: Member) -> None:
         self.member_list.remove(member_obj)
         member_obj.class_list.remove(self)
 
-    def remove_trainer(self, trainer_obj: Trainer):
+    def remove_trainer(self, trainer_obj: Trainer) -> None:
         self.trainer_list.remove(trainer_obj)
         trainer_obj.class_list.remove(self)
+
+    def cleanup(self) -> None:
+        for i in list(self.member_list):
+            self.remove_member(i)
+        
+        for i in list(self.trainer_list):
+            self.remove_trainer(i)
 
     def __repr__(self) -> str:
         return f"TrainingClass({self.id})"
@@ -132,6 +146,10 @@ class Member(NumberedObject):
     def remove_training_class(self, trainingclass_obj: TrainingClass):
         trainingclass_obj.remove_member(self)
 
+    def cleanup(self) -> None:
+        for i in list(self.class_list):
+            self.remove_training_class(i)
+        
     def __repr__(self) -> str:
         return f"Member({self.id})"
 
@@ -160,6 +178,10 @@ class Trainer(NumberedObject):
 
     def remove_training_class(self, training_class_obj: TrainingClass):
         training_class_obj.remove_trainer(self)
+        
+    def cleanup(self) -> None:
+        for i in list(self.class_list):
+            self.remove_training_class(i)
 
     def __repr__(self) -> str:
         return f"Trainer({self.id})"
