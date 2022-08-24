@@ -77,10 +77,3 @@ class CRUDMenu(BaseMenu):
     def delete(self):
         obj = self.table.interactive_get()
         self.table.remove(obj)
-        
-
-
-t = ObjectTable(Trainer)
-
-m = CRUDMenu(t)
-m.prompt()
