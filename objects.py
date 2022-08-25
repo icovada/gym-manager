@@ -1,5 +1,4 @@
 from __future__ import annotations
-from tokenize import Number
 from tabulate import tabulate
 import itertools
 from typing import List, Type, Dict
@@ -7,13 +6,12 @@ from typing import List, Type, Dict
 
 class NumberedObject():
     id = itertools.count()
-    prompt_attrs: Dict[str, str] = {}
+    prompt_attrs: Dict[str, str]
+    menu_attrs: Dict[str, str]
 
-    def get_menu_attrs_dict(self) -> dict:
+    def get_menu_dict(self) -> dict:
         outd = {}
-        attrs_plus_id = {"id": "ID"}
-        attrs_plus_id.update(self.prompt_attrs)
-        for attr in attrs_plus_id:
+        for attr in self.prompt_attrs:
             outd[attr] = getattr(self, attr)
 
         return outd
@@ -56,7 +54,7 @@ class ObjectTable():
         return out_list
 
     def format_list(self) -> str:
-        table = [x.get_menu_attrs_dict() for x in self._dict.values()]
+        table = [x.get_menu_dict() for x in self._dict.values()]
         return tabulate(table, self.object_class.prompt_attrs, tablefmt="simple")
 
     def interactive_get(self) -> Type[object_class]:
@@ -67,6 +65,7 @@ class ObjectTable():
 
 
 class TrainingClass(NumberedObject):
+    pretty_name = "Training Class"
     id=itertools.count()
     name: str
     trainer_list: List[Trainer]
@@ -75,6 +74,8 @@ class TrainingClass(NumberedObject):
     member_list: List[Member]
     prompt_attrs={"name": "Name",
         "price": "Price", "max_members": "Max Members", "empty_seats": "Empty Seats"}
+    menu_attrs = {"id": "ID", "name": "Name",
+        "price": "Price", "max_members": "Max Members"}
 
     def __init__(self, name: str, price: str, max_members: int) -> None:
         super().__init__()
@@ -121,6 +122,7 @@ class TrainingClass(NumberedObject):
         return f"TrainingClass({self.name})"
 
 class Member(NumberedObject):
+    pretty_name = "Member"
     id = itertools.count()
     name: str
     surname: str
@@ -129,6 +131,8 @@ class Member(NumberedObject):
     class_list: List[TrainingClass]
     prompt_attrs={"name": "Name",
         "surname": "Surname", "phone": "Phone", "age": "Age"}
+    menu_attrs = {"id": "ID", "name": "Name",
+        "price": "Price", "max_members": "Max Members",}
 
 
     def __init__(self, name: str, surname: str, phone: str, age: int):
@@ -157,12 +161,15 @@ class Member(NumberedObject):
         return f"Member({self.name}, {self.surname})"
 
 class Trainer(NumberedObject):
+    pretty_name = "Trainer"
     id = itertools.count()
     name: str
     surname: str
     phone: str
     class_list: List[TrainingClass]
     prompt_attrs={"name": "Name",
+        "surname": "Surname", "phone": "Phone"}
+    menu_attrs={"id": "ID", "name": "Name",
         "surname": "Surname", "phone": "Phone"}
 
     def __init__(self, name: str, surname: str, phone: str):
