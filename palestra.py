@@ -1,4 +1,4 @@
-from objects import TrainingClass, Member, Trainer, ObjectTable
+from objects import NumberedObjectRelationship, TrainingClass, Member, Trainer, ObjectTable
 from menu_manager import BaseMenu, CRUDMenu, MenuChoice
 
 
@@ -20,4 +20,6 @@ if __name__ == "__main__":
     members_list = ObjectTable(Member)
     trainers_list = ObjectTable(Trainer)
     training_class_list = ObjectTable(TrainingClass)
+    training_class_member_map = NumberedObjectRelationship(training_class_list, members_list)
+    training_class_trainer_map = NumberedObjectRelationship(training_class_list, trainers_list)
     main(members_list, trainers_list, training_class_list)

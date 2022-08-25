@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from multiprocessing.sharedctypes import Value
-from typing import List, Type, Callable
+from typing import Callable
 from tabulate import tabulate
 import itertools
-from objects import ObjectTable, Trainer
+from objects import ObjectTable
 
 
 @dataclass
@@ -45,6 +44,13 @@ class BaseMenu():
                 print("Choice not found")
                 continue
 
+class RelationshipMenu(BaseMenu):
+    def __init__(self, table: ObjectTable):
+        super().__init__()
+        self.table = table
+        for i in self.table.relationships:
+            self.add_choice(MenuChoice(f"Add {i.side_a.object_class.__name__} to {i.side_b.object_class.__name__}", i.interactive_add))
+            self.add_choice(MenuChoice(f"Remove {i.side_a.object_class.__name__} to {i.side_b.object_class.__name__}", i.interactive_add))
 
 class CRUDMenu(BaseMenu):
     def __init__(self, table: ObjectTable):
@@ -54,6 +60,7 @@ class CRUDMenu(BaseMenu):
         self.add_choice(MenuChoice("Create", self.create))
         self.add_choice(MenuChoice("Update", self.update))
         self.add_choice(MenuChoice("Delete", self.delete))
+        self.add_choice(MenuChoice("Manage Relationships", self.relationships))
 
     def list(self) -> None:
         print(self.table.format_list())
@@ -81,3 +88,7 @@ class CRUDMenu(BaseMenu):
     def delete(self):
         obj = self.table.interactive_get()
         self.table.remove(obj)
+
+    def relationships(self):
+        relationship_menu = RelationshipMenu(self.table)
+        relationship_menu.prompt()

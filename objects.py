@@ -8,11 +8,10 @@ class NumberedObject():
     id = itertools.count()
     prompt_attrs: Dict[str, str]
     menu_attrs: Dict[str, str]
-    relationships = []
 
     def get_menu_dict(self) -> dict:
         outd = {}
-        for attr in self.prompt_attrs:
+        for attr in self.menu_attrs:
             outd[attr] = getattr(self, attr)
 
         return outd
@@ -24,6 +23,7 @@ class NumberedObject():
 class ObjectTable():
     _dict = Dict[int, NumberedObject]
     object_class: Type[NumberedObject] = NumberedObject
+    relationships: set = set()
 
     def __init__(self, object_class: Type[NumberedObject]) -> None:
         self._dict = {}
@@ -56,12 +56,12 @@ class ObjectTable():
 
     def format_list(self) -> str:
         table = [x.get_menu_dict() for x in self._dict.values()]
-        return tabulate(table, self.object_class.prompt_attrs, tablefmt="simple")
+        return tabulate(table, self.object_class.menu_attrs, tablefmt="simple")
 
     def interactive_get(self) -> Type[object_class]:
         print(self.format_list())
         print("")
-        id = input("Select a row by its ID: ")
+        id = input(f"Select a {self.object_class.__name__} by its ID: ")
         return self.get(id)
 
 
@@ -73,9 +73,9 @@ class TrainingClass(NumberedObject):
     max_members: int
     member_list: List[Member]
     prompt_attrs = {"name": "Name",
-                    "price": "Price", "max_members": "Max Members", "empty_seats": "Empty Seats"}
+                    "price": "Price", "max_members": "Max Members"}
     menu_attrs = {"id": "ID", "name": "Name",
-                  "price": "Price", "max_members": "Max Members"}
+                  "price": "Price", "max_members": "Max Members",  "empty_seats": "Empty Seats", "member_list": "Members"}
 
     def __init__(self, name: str, price: str, max_members: int) -> None:
         super().__init__()
@@ -115,6 +115,11 @@ class TrainingClass(NumberedObject):
         for i in list(self.trainer_list):
             self.remove_Trainer(i)
 
+    def __setattr__(self, __name: str, __value) -> None:
+        if __name == "max_members":
+            __value = int(__value)
+        return super().__setattr__(__name, __value)
+
     def __repr__(self) -> str:
         return f"TrainingClass({self.id})"
 
@@ -132,7 +137,7 @@ class Member(NumberedObject):
     prompt_attrs = {"name": "Name",
                     "surname": "Surname", "phone": "Phone", "age": "Age"}
     menu_attrs = {"id": "ID", "name": "Name",
-                  "price": "Price", "max_members": "Max Members", }
+                  "surname": "Surname"}
 
     def __init__(self, name: str, surname: str, phone: str, age: int):
         super().__init__()
@@ -200,8 +205,8 @@ class NumberedObjectRelationship():
     def __init__(self, side_a: ObjectTable, side_b: ObjectTable) -> None:
         self.side_a = side_a
         self.side_b = side_b
-        self.side_a.relationships.append(self)
-        self.side_b.relationships.append(self)
+        self.side_a.relationships.add(self)
+        self.side_b.relationships.add(self)
 
     def interactive_add(self):
         a_obj = self.side_a.interactive_get()
@@ -217,9 +222,9 @@ class NumberedObjectRelationship():
 
     def add(self, a_obj, b_obj):
         f = getattr(a_obj, "add_"+b_obj.__class__.__name__)
-        f()
+        f(b_obj)
 
     def remove(self, a_obj, b_obj):
 
         f = getattr(a_obj, "renmove_"+b_obj.__class__.__name__)
-        f()
+        f(b_obj)
