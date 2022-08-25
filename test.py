@@ -1,5 +1,6 @@
+from tokenize import Number
 import unittest
-from objects import Member, ObjectTable, Trainer, TrainingClass
+from objects import Member, NumberedObjectRelationship, ObjectTable, Trainer, TrainingClass
 
 
 class TestBaseObjects(unittest.TestCase):
@@ -7,11 +8,11 @@ class TestBaseObjects(unittest.TestCase):
         training_class = TrainingClass("yoga", "300", 3)
         member = Member("federico", "tabbo", "3601074728", 31)
 
-        training_class.add_member(member)
+        training_class.add_Member(member)
         self.assertIn(member, training_class.member_list)
         self.assertIn(training_class, member.class_list)
 
-        training_class.remove_member(member)
+        training_class.remove_Member(member)
         self.assertNotIn(member, training_class.member_list)
         self.assertNotIn(training_class, member.class_list)
 
@@ -19,11 +20,11 @@ class TestBaseObjects(unittest.TestCase):
         training_class = TrainingClass("yoga", "300", 3)
         member = Member("federico", "tabbo", "3601074728", 31)
 
-        member.add_training_class(training_class)
+        member.add_TrainingClass(training_class)
         self.assertIn(member, training_class.member_list)
         self.assertIn(training_class, member.class_list)
 
-        member.remove_training_class(training_class)
+        member.remove_TrainingClass(training_class)
         self.assertNotIn(member, training_class.member_list)
         self.assertNotIn(training_class, member.class_list)
 
@@ -31,11 +32,11 @@ class TestBaseObjects(unittest.TestCase):
         training_class = TrainingClass("yoga", "300", 3)
         trainer = Trainer("tizio", "muscoloso", "432443")
 
-        training_class.add_trainer(trainer)
+        training_class.add_Trainer(trainer)
         self.assertIn(trainer, training_class.trainer_list)
         self.assertIn(training_class, trainer.class_list)
 
-        training_class.remove_trainer(trainer)
+        training_class.remove_Trainer(trainer)
         self.assertNotIn(trainer, training_class.trainer_list)
         self.assertNotIn(training_class, trainer.class_list)
 
@@ -43,11 +44,11 @@ class TestBaseObjects(unittest.TestCase):
         training_class = TrainingClass("yoga", "300", 3)
         trainer = Trainer("tizio", "muscoloso", "432443")
 
-        trainer.add_training_class(training_class)
+        trainer.add_TrainingClass(training_class)
         self.assertIn(trainer, training_class.trainer_list)
         self.assertIn(training_class, trainer.class_list)
 
-        trainer.remove_training_class(training_class)
+        trainer.remove_TrainingClass(training_class)
         self.assertNotIn(trainer, training_class.trainer_list)
         self.assertNotIn(training_class, trainer.class_list)
 
@@ -56,7 +57,7 @@ class TestBaseObjects(unittest.TestCase):
         member = Member("federico", "tabbo", "3601074728", 31)
 
         self.assertRaises(
-            ValueError, training_class.add_member, member_obj=member)
+            ValueError, training_class.add_Member, member_obj=member)
 
 
 class TestObjectTable(unittest.TestCase):
@@ -119,13 +120,13 @@ class TestCleanup(unittest.TestCase):
         member_list.add(mem1)
         member_list.add(mem2)
         
-        trc1.add_member(mem1)
-        trc1.add_member(mem2)
-        trc1.add_trainer(tr1)
+        trc1.add_Member(mem1)
+        trc1.add_Member(mem2)
+        trc1.add_Trainer(tr1)
 
-        trc2.add_member(mem1)
-        trc2.add_member(mem2)
-        trc2.add_trainer(tr2)
+        trc2.add_Member(mem1)
+        trc2.add_Member(mem2)
+        trc2.add_Trainer(tr2)
 
         class_list.remove(trc1)
         class_list.remove(trc2)
@@ -141,6 +142,51 @@ class TestCleanup(unittest.TestCase):
         self.assertNotIn(trc2, tr2.class_list)
         self.assertNotIn(trc2, mem1.class_list)
         self.assertNotIn(trc2, mem2.class_list)
+
+
+class TestRelationships(unittest.TestCase):
+    def add_one_to_other(self):
+        class_list = ObjectTable(TrainingClass)
+        trc1 = TrainingClass("zumba", "350", 3)
+        trc2 = TrainingClass("zumba2", "350", 3)
+        
+        class_list.add(trc1)
+        class_list.add(trc2)
+        
+        trainer_list = ObjectTable(Trainer)
+        tr1 = Trainer("paola", "tizia", "44343423")
+        tr2 = Trainer("paolo", "tizio", "44343423")
+        trainer_list.add(tr1)
+        trainer_list.add(tr2)
+
+        member_list = ObjectTable(Member)
+        mem1 = Member("paolo", "tizio", "44343423", 34)
+        mem2 = Member("paola", "tizia", "44343423", 45)
+        member_list.add(mem1)
+        member_list.add(mem2)
+        
+        class_trainer_map = NumberedObjectRelationship(class_list, trainer_list)
+        class_member_map = NumberedObjectRelationship(class_list, member_list)
+
+        class_member_map.add(trc1, mem1)
+        class_member_map.add(trc1, mem2)
+        class_trainer_map.add(trc1, tr1)
+
+        class_member_map.add(trc2, mem1)
+        class_member_map.add(trc2, mem2)
+        class_trainer_map.add(trc2, tr2)
+
+        self.assertIn(trc1, class_list.all())
+        self.assertIn(trc1, tr1.class_list)
+        self.assertIn(trc1, tr2.class_list)
+        self.assertIn(trc1, mem1.class_list)
+        self.assertIn(trc1, mem2.class_list)
+        
+        self.assertIn(trc2, class_list.all())
+        self.assertIn(trc2, tr1.class_list)
+        self.assertIn(trc2, tr2.class_list)
+        self.assertIn(trc2, mem1.class_list)
+        self.assertIn(trc2, mem2.class_list)
 
 if __name__ == '__main__':
     unittest.main()

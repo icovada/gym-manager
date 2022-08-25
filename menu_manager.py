@@ -59,7 +59,7 @@ class CRUDMenu(BaseMenu):
         print(self.table.format_list())
 
     def prompt(self):
-        print("######### Manage " + self.table.object_class.pretty_name + "s ###########")
+        print("######### Manage " + self.table.object_class.__name__ + "s ###########")
         return super().prompt()
 
     def create(self):

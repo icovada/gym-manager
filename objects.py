@@ -8,6 +8,7 @@ class NumberedObject():
     id = itertools.count()
     prompt_attrs: Dict[str, str]
     menu_attrs: Dict[str, str]
+    relationships = []
 
     def get_menu_dict(self) -> dict:
         outd = {}
@@ -15,7 +16,7 @@ class NumberedObject():
             outd[attr] = getattr(self, attr)
 
         return outd
-    
+
     def cleanup(self) -> None:
         raise NotImplementedError
 
@@ -65,17 +66,16 @@ class ObjectTable():
 
 
 class TrainingClass(NumberedObject):
-    pretty_name = "Training Class"
-    id=itertools.count()
+    id = itertools.count()
     name: str
     trainer_list: List[Trainer]
     price: str
     max_members: int
     member_list: List[Member]
-    prompt_attrs={"name": "Name",
-        "price": "Price", "max_members": "Max Members", "empty_seats": "Empty Seats"}
+    prompt_attrs = {"name": "Name",
+                    "price": "Price", "max_members": "Max Members", "empty_seats": "Empty Seats"}
     menu_attrs = {"id": "ID", "name": "Name",
-        "price": "Price", "max_members": "Max Members"}
+                  "price": "Price", "max_members": "Max Members"}
 
     def __init__(self, name: str, price: str, max_members: int) -> None:
         super().__init__()
@@ -90,30 +90,30 @@ class TrainingClass(NumberedObject):
     def empty_seats(self) -> int:
         return self.max_members - len(self.member_list)
 
-    def add_member(self, member_obj: Member) -> None:
+    def add_Member(self, member_obj: Member) -> None:
         if len(self.member_list) == self.max_members:
             raise ValueError("Class is full")
         self.member_list.append(member_obj)
         member_obj.class_list.append(self)
 
-    def add_trainer(self, trainer_obj: Trainer) -> None:
+    def add_Trainer(self, trainer_obj: Trainer) -> None:
         self.trainer_list.append(trainer_obj)
         trainer_obj.class_list.append(self)
 
-    def remove_member(self, member_obj: Member) -> None:
+    def remove_Member(self, member_obj: Member) -> None:
         self.member_list.remove(member_obj)
         member_obj.class_list.remove(self)
 
-    def remove_trainer(self, trainer_obj: Trainer) -> None:
+    def remove_Trainer(self, trainer_obj: Trainer) -> None:
         self.trainer_list.remove(trainer_obj)
         trainer_obj.class_list.remove(self)
 
     def cleanup(self) -> None:
         for i in list(self.member_list):
-            self.remove_member(i)
-        
+            self.remove_Member(i)
+
         for i in list(self.trainer_list):
-            self.remove_trainer(i)
+            self.remove_Trainer(i)
 
     def __repr__(self) -> str:
         return f"TrainingClass({self.id})"
@@ -121,19 +121,18 @@ class TrainingClass(NumberedObject):
     def __str__(self) -> str:
         return f"TrainingClass({self.name})"
 
+
 class Member(NumberedObject):
-    pretty_name = "Member"
     id = itertools.count()
     name: str
     surname: str
     phone: str
     age: int
     class_list: List[TrainingClass]
-    prompt_attrs={"name": "Name",
-        "surname": "Surname", "phone": "Phone", "age": "Age"}
+    prompt_attrs = {"name": "Name",
+                    "surname": "Surname", "phone": "Phone", "age": "Age"}
     menu_attrs = {"id": "ID", "name": "Name",
-        "price": "Price", "max_members": "Max Members",}
-
+                  "price": "Price", "max_members": "Max Members", }
 
     def __init__(self, name: str, surname: str, phone: str, age: int):
         super().__init__()
@@ -144,33 +143,33 @@ class Member(NumberedObject):
         self.age = age
         self.class_list = []
 
-    def add_training_class(self, class_obj: TrainingClass):
-        class_obj.add_member(self)
+    def add_TrainingClass(self, class_obj: TrainingClass):
+        class_obj.add_Member(self)
 
-    def remove_training_class(self, trainingclass_obj: TrainingClass):
-        trainingclass_obj.remove_member(self)
+    def remove_TrainingClass(self, trainingclass_obj: TrainingClass):
+        trainingclass_obj.remove_Member(self)
 
     def cleanup(self) -> None:
         for i in list(self.class_list):
-            self.remove_training_class(i)
-        
+            self.remove_TrainingClass(i)
+
     def __repr__(self) -> str:
         return f"Member({self.id})"
 
     def __str__(self) -> str:
         return f"Member({self.name}, {self.surname})"
 
+
 class Trainer(NumberedObject):
-    pretty_name = "Trainer"
     id = itertools.count()
     name: str
     surname: str
     phone: str
     class_list: List[TrainingClass]
-    prompt_attrs={"name": "Name",
-        "surname": "Surname", "phone": "Phone"}
-    menu_attrs={"id": "ID", "name": "Name",
-        "surname": "Surname", "phone": "Phone"}
+    prompt_attrs = {"name": "Name",
+                    "surname": "Surname", "phone": "Phone"}
+    menu_attrs = {"id": "ID", "name": "Name",
+                  "surname": "Surname", "phone": "Phone"}
 
     def __init__(self, name: str, surname: str, phone: str):
         super().__init__()
@@ -180,18 +179,47 @@ class Trainer(NumberedObject):
         self.phone = phone
         self.class_list = []
 
-    def add_training_class(self, training_class_obj: TrainingClass):
-        training_class_obj.add_trainer(self)
+    def add_TrainingClass(self, training_class_obj: TrainingClass):
+        training_class_obj.add_Trainer(self)
 
-    def remove_training_class(self, training_class_obj: TrainingClass):
-        training_class_obj.remove_trainer(self)
-        
+    def remove_TrainingClass(self, training_class_obj: TrainingClass):
+        training_class_obj.remove_Trainer(self)
+
     def cleanup(self) -> None:
         for i in list(self.class_list):
-            self.remove_training_class(i)
+            self.remove_TrainingClass(i)
 
     def __repr__(self) -> str:
         return f"Trainer({self.id})"
 
     def __str__(self) -> str:
         return f"Trainer({self.name}, {self.surname})"
+
+
+class NumberedObjectRelationship():
+    def __init__(self, side_a: ObjectTable, side_b: ObjectTable) -> None:
+        self.side_a = side_a
+        self.side_b = side_b
+        self.side_a.relationships.append(self)
+        self.side_b.relationships.append(self)
+
+    def interactive_add(self):
+        a_obj = self.side_a.interactive_get()
+        b_obj = self.side_b.interactive_get()
+
+        self.add(a_obj, b_obj)
+
+    def interactive_remove(self):
+        a_obj = self.side_a.interactive_get()
+        b_obj = self.side_b.interactive_get()
+
+        self.remove(a_obj, b_obj)
+
+    def add(self, a_obj, b_obj):
+        f = getattr(a_obj, "add_"+b_obj.__class__.__name__)
+        f()
+
+    def remove(self, a_obj, b_obj):
+
+        f = getattr(a_obj, "renmove_"+b_obj.__class__.__name__)
+        f()
