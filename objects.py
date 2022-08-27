@@ -225,6 +225,5 @@ class NumberedObjectRelationship():
         f(b_obj)
 
     def remove(self, a_obj, b_obj):
-
-        f = getattr(a_obj, "renmove_"+b_obj.__class__.__name__)
+        f = getattr(a_obj, "remove_"+b_obj.__class__.__name__)
         f(b_obj)
