@@ -1,6 +1,7 @@
-from tokenize import Number
 import unittest
+from unittest.mock import patch
 from objects import Member, NumberedObjectRelationship, ObjectTable, Trainer, TrainingClass
+import menu_manager
 
 
 class TestBaseObjects(unittest.TestCase):
@@ -91,7 +92,6 @@ class TestObjectTable(unittest.TestCase):
 
         self.assertEqual(len(class_list.filter(attr="name", value="zumba")), 0)
 
-
     def test_fail_add_other_object_type(self):
         class_list = ObjectTable(Member)
         training_class = TrainingClass("zumba", "350", 3)
@@ -104,10 +104,10 @@ class TestCleanup(unittest.TestCase):
         class_list = ObjectTable(TrainingClass)
         trc1 = TrainingClass("zumba", "350", 3)
         trc2 = TrainingClass("zumba2", "350", 3)
-        
+
         class_list.add(trc1)
         class_list.add(trc2)
-        
+
         trainer_list = ObjectTable(Trainer)
         tr1 = Trainer("paola", "tizia", "44343423")
         tr2 = Trainer("paolo", "tizio", "44343423")
@@ -119,7 +119,7 @@ class TestCleanup(unittest.TestCase):
         mem2 = Member("paola", "tizia", "44343423", 45)
         member_list.add(mem1)
         member_list.add(mem2)
-        
+
         trc1.add_Member(mem1)
         trc1.add_Member(mem2)
         trc1.add_Trainer(tr1)
@@ -130,13 +130,13 @@ class TestCleanup(unittest.TestCase):
 
         class_list.remove(trc1)
         class_list.remove(trc2)
-        
+
         self.assertNotIn(trc1, class_list.all())
         self.assertNotIn(trc1, tr1.class_list)
         self.assertNotIn(trc1, tr2.class_list)
         self.assertNotIn(trc1, mem1.class_list)
         self.assertNotIn(trc1, mem2.class_list)
-        
+
         self.assertNotIn(trc2, class_list.all())
         self.assertNotIn(trc2, tr1.class_list)
         self.assertNotIn(trc2, tr2.class_list)
@@ -149,10 +149,10 @@ class TestRelationships(unittest.TestCase):
         class_list = ObjectTable(TrainingClass)
         trc1 = TrainingClass("zumba", "350", 3)
         trc2 = TrainingClass("zumba2", "350", 3)
-        
+
         class_list.add(trc1)
         class_list.add(trc2)
-        
+
         trainer_list = ObjectTable(Trainer)
         tr1 = Trainer("paola", "tizia", "44343423")
         tr2 = Trainer("paolo", "tizio", "44343423")
@@ -164,7 +164,7 @@ class TestRelationships(unittest.TestCase):
         mem2 = Member("paola", "tizia", "44343423", 45)
         member_list.add(mem1)
         member_list.add(mem2)
-        
+
         class_trainer_map = NumberedObjectRelationship(class_list, trainer_list)
         class_member_map = NumberedObjectRelationship(class_list, member_list)
 
@@ -181,12 +181,31 @@ class TestRelationships(unittest.TestCase):
         self.assertIn(trc1, tr2.class_list)
         self.assertIn(trc1, mem1.class_list)
         self.assertIn(trc1, mem2.class_list)
-        
+
         self.assertIn(trc2, class_list.all())
         self.assertIn(trc2, tr1.class_list)
         self.assertIn(trc2, tr2.class_list)
         self.assertIn(trc2, mem1.class_list)
         self.assertIn(trc2, mem2.class_list)
+
+
+class TestBaseMenu(unittest.TestCase):
+    # https://www.fugue.co/blog/2016-02-11-python-mocking-101
+
+    @patch('menu_manager.input')
+    def test_base_menu_quit(self, mock_input):
+        mock_input.return_value = "q"
+
+        menu = menu_manager.BaseMenu()
+        self.assertIsNone(menu.prompt())
+
+    @patch('menu_manager.input')
+    def test_base_menu_wrong_option(self, mock_input):
+        mock_input.side_effect = ["1", "q"]
+
+        menu = menu_manager.BaseMenu()
+        menu.prompt()
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()
